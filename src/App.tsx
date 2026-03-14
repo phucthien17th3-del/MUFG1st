@@ -2446,30 +2446,20 @@ export default function App() {
     messages: []
   });
 
-  // Socket.io initialization
+// Socket.io initialization & Listeners
   useEffect(() => {
-  socketRef.current = io();
+    socketRef.current = io();
 
-  socketRef.current.on("connect", () => {
-    socketRef.current.emit("get_initial_data", user?.id);
-
-    socketRef.current.emit("join_room", "VIP1");
-    socketRef.current.emit("join_room", "VIP2");
-  });
-
-  return () => {
-  if (socketRef.current) {
-    socketRef.current.disconnect();
-  }
-};
-
-}, [user]);
-
+    socketRef.current.on("connect", () => {
+      socketRef.current.emit("get_initial_data", user?.id);
+      socketRef.current.emit("join_room", "VIP1");
+      socketRef.current.emit("join_room", "VIP2");
+    });
 
     socketRef.current.on('initial_data', (data: any) => {
       if (data.settings) {
         setPlatformSettings(data.settings);
-      };
+      }
       if (data.lottery) {
         setVip1State(prev => ({ 
           ...prev, 
@@ -2483,11 +2473,12 @@ export default function App() {
           currentExpect: data.lottery.vip2.currentExpect,
           futureResults: data.lottery.vip2.futureResults 
         }));
-      };
+      }
       setRegisteredUsers(prev => {
         const admin = prev.find(u => u.username === 'admin');
         const dbUsers = data.users || [];
-        return [admin, ...dbUsers.filter((u: any) => u.username !== 'admin')];
+        const others = dbUsers.filter((u: any) => u.username !== 'admin');
+        return admin ? [admin, ...others] : others;
       });
       
       if (data.messages) {
@@ -2495,13 +2486,13 @@ export default function App() {
           const systemMsg = prev[0];
           return [systemMsg, ...data.messages.reverse()];
         });
-      };
+      }
       if (data.transactions) {
         setTransactions(data.transactions);
-      };
+      }
       if (data.orders) {
-  setUserOrders(data.orders);
-}
+        setUserOrders(data.orders);
+      }
     });
 
     socketRef.current.on('user_registered', (userData: any) => {
@@ -2556,7 +2547,7 @@ export default function App() {
         if (prev && prev.id === userData.id) {
           setBalance(userData.balance);
           return { ...prev, ...userData };
-        };
+        }
         return prev;
       });
     });
@@ -2581,7 +2572,7 @@ export default function App() {
         count++;
         if (count > 25) {
           clearInterval(animInterval);
-        };
+        }
       }, 100);
     });
 
@@ -2616,7 +2607,6 @@ export default function App() {
     });
 
     socketRef.current.on('user_deleted', (data: any) => {
-      console.log('User deleted event received:', data.userId);
       setRegisteredUsers(prev => prev.filter(u => u.id !== data.userId));
       setTransactions(prev => prev.filter(tx => tx.userId !== data.userId));
       setAllChatMessages(prev => prev.filter(m => m.userId !== data.userId));
@@ -2624,7 +2614,7 @@ export default function App() {
 
     socketRef.current.on('platform_settings_updated', (settings: any) => {
       setPlatformSettings(settings);
-      setShowAnnouncement(true); // Show announcement immediately when updated
+      setShowAnnouncement(true);
     });
 
     socketRef.current.on('messages_cleaned', () => {
@@ -2632,12 +2622,11 @@ export default function App() {
     });
 
     return () => {
-  if (socketRef.current) {
-    socketRef.current.disconnect();
-  }
-};
-
-}, [user]);
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [user]);
 
   // Simulation Loops
   useEffect(() => {
@@ -2652,7 +2641,6 @@ export default function App() {
       const code = CODES[Math.floor(Math.random() * CODES.length)];
       
       const settings = roomId === 'VIP1' ? platformSettings.vip1 : platformSettings.vip2;
-      // Generate amount and ensure last 3 digits are 000
       let amount = Math.floor(Math.random() * (settings.botMax - settings.botMin + 1)) + settings.botMin;
       amount = Math.floor(amount / 1000) * 1000;
 
@@ -2661,16 +2649,15 @@ export default function App() {
 
       setState(prev => {
         const newMessages: Message[] = [
-  {
-    id: Date.now().toString(),
-    nickname: name,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-    content: `${code}/${amount}`,
-    addtime: timeStr
-  }
-];
+          {
+            id: Date.now().toString(),
+            nickname: name,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+            content: `${code}/${amount}`,
+            addtime: timeStr
+          }
+        ];
 
-        // CSKH Confirmation (Simultaneous)
         if (Math.random() > 0.4) {
           newMessages.unshift({
             id: (Date.now() + 1).toString(),
@@ -2680,7 +2667,7 @@ export default function App() {
             addtime: timeStr,
             isService: true
           });
-        };
+        }
 
         return {
           ...prev,
@@ -2696,8 +2683,8 @@ export default function App() {
       if (roomId === 'VIP1') {
         timeoutVip1 = setTimeout(() => simulateBotMessage('VIP1'), delay);
       } else {
-  timeoutVip2 = setTimeout(() => simulateBotMessage('VIP2'), delay);
-}
+        timeoutVip2 = setTimeout(() => simulateBotMessage('VIP2'), delay);
+      }
     };
 
     scheduleNext('VIP1');
