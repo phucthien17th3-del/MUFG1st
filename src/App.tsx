@@ -2468,10 +2468,10 @@ export default function App() {
   });
 
   return () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
-  };
+  if (socketRef.current) {
+    socketRef.current.disconnect();
+  }
+}
 
 }, [user]);
 
