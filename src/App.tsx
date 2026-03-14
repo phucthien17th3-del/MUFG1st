@@ -2646,7 +2646,7 @@ export default function App() {
         socketRef.current.disconnect();
       }
     };
-  }, []);
+  }, [user]);
 
   // Simulation Loops
   useEffect(() => {
