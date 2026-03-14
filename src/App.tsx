@@ -2414,7 +2414,7 @@ export default function App() {
       max: 500000000,
       botMin: 150000000,
       botMax: 500000000
-};
+}
   });
 
   const showAlert = (title: string, msg: string, type: 'success' | 'error' = 'error') => {
