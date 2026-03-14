@@ -188,8 +188,7 @@ app.get("*", (req, res) => {
 
     // Initial data sync
     socket.on("get_initial_data", (userId) => {
-
-  socket.userId = userId;   // thêm dòng này
+  socket.userId = userId;   // Lưu userId của người dùng vào socket để kiểm tra
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 
@@ -197,20 +196,15 @@ app.get("*", (req, res) => {
 
   let orders;
 
-if (user.username === "admin") {
-
-  orders = db.prepare("SELECT * FROM orders ORDER BY time DESC").all();
-
-} else {
-
-  orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(userId);
-
-}
+  if (user.username === "admin") {  // Kiểm tra nếu là admin
+    orders = db.prepare("SELECT * FROM orders ORDER BY time DESC").all();
+  } else {
+    orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(userId);
+  }
 
   const transactions = db.prepare("SELECT * FROM transactions WHERE userId = ? ORDER BY time DESC").all(userId);
 
   const settingsRow = db.prepare("SELECT * FROM settings WHERE id = 'platform'").get();
-
   const settings = settingsRow ? JSON.parse(settingsRow.data) : null;
 
   socket.emit("initial_data", { 
@@ -224,7 +218,6 @@ if (user.username === "admin") {
       vip2: vip2State
     }
   });
-
 });
 
 socket.on("admin_get_all_orders", (adminId) => {
@@ -265,37 +258,42 @@ socket.on("admin_get_user_orders", (data) => {
     });
 
    socket.on("place_order", (order) => {
-
-  io.to(order.room).emit("global_trade_notice", order);
+  io.to(order.room).emit("global_trade_notice", order);  // Gửi cho phòng giao dịch
 
   try {
-        const user = db.prepare("SELECT * FROM users WHERE id = ?").get(order.userId);
-        if (!user || user.balance < order.amount) return;
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(order.userId);
+    if (!user || user.balance < order.amount) return;
 
-        const newBalance = user.balance - order.amount;
-        db.prepare("UPDATE users SET balance = ? WHERE id = ?").run(newBalance, order.userId);
+    const newBalance = user.balance - order.amount;
+    db.prepare("UPDATE users SET balance = ? WHERE id = ?").run(newBalance, order.userId);
 
-        const stmt = db.prepare(`
-          INSERT INTO orders (id, userId, room, expect, betCode, amount, status, time)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        stmt.run(
-          order.id,
-          order.userId,
-          order.room,
-          order.expect,
-          order.betCode,
-          order.amount,
-          order.status,
-          order.time
-        );
-        socket.emit("new_order", order);          // gửi cho chính user đặt
-io.to(order.room).emit("room_order", order);  // gửi cho phòng giao dịch
-        io.emit("user_updated", { ...user, balance: newBalance });
-      } catch (e) {
-        console.error("Place order error:", e);
-      }
-    });
+    const stmt = db.prepare(`
+      INSERT INTO orders (id, userId, room, expect, betCode, amount, status, time)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      order.id,
+      order.userId,
+      order.room,
+      order.expect,
+      order.betCode,
+      order.amount,
+      order.status,
+      order.time
+    );
+
+    socket.emit("new_order", order);  // Gửi cho chính người dùng đặt lệnh
+
+    if (user.username === "admin") {
+      io.emit("admin_all_orders", order);  // Gửi cho admin xem tất cả lệnh
+    }
+
+    io.emit("user_updated", { ...user, balance: newBalance });
+
+  } catch (e) {
+    console.error("Place order error:", e);
+  }
+});
     
     socket.on("update_future_results", (data) => {
       try {
