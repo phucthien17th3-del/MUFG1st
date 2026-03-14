@@ -202,8 +202,11 @@ app.get("*", (req, res) => {
       }
     });
 
-    socket.on("place_order", (order) => {
-      try {
+   socket.on("place_order", (order) => {
+
+  io.emit("global_trade_notice", order);
+
+  try {
         const user = db.prepare("SELECT * FROM users WHERE id = ?").get(order.userId);
         if (!user || user.balance < order.amount) return;
 
