@@ -2451,19 +2451,17 @@ export default function App() {
   socketRef.current = io();
 
   socketRef.current.on("connect", () => {
-
     socketRef.current.emit("get_initial_data", user?.id);
 
     socketRef.current.emit("join_room", "VIP1");
     socketRef.current.emit("join_room", "VIP2");
-
   });
 
   return () => {
     if (socketRef.current) {
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
-    }
+    };
   };
 
 }, [user]);
