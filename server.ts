@@ -189,6 +189,8 @@ app.get("*", (req, res) => {
     // Initial data sync
     socket.on("get_initial_data", (userId) => {
 
+  socket.userId = userId;   // thêm dòng này
+
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 
   const messages = db.prepare("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 100").all();
@@ -297,7 +299,10 @@ socket.on("admin_get_user_orders", (data) => {
     });
 
     socket.on("register", (userData) => {
-      try {
+
+  socket.userId = userData.id;   // thêm dòng này
+
+  try {
         const stmt = db.prepare(`
           INSERT INTO users (id, username, password, avatar, balance, vip, isVirtual, isBetBlocked, withdrawBlockStatus, inviteCode, referredBy)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
