@@ -192,6 +192,8 @@ app.get("*", (req, res) => {
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 
+if (!user) return;   // THÊM DÒNG NÀY
+
   const messages = db.prepare("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 100").all();
 
   let orders;
@@ -418,7 +420,8 @@ socket.on("admin_get_user_orders", (data) => {
         );
 
         if (txData.type === 'withdraw') {
-          const newBalance = user.balance - txData.amount;
+          if (user.balance < txData.amount) return;
+const newBalance = user.balance - txData.amount;
           db.prepare(`
             UPDATE users SET 
               balance = ?, 
