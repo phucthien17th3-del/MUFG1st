@@ -81,25 +81,25 @@ const LoginView = ({
     if (!username || !password) {
       showAlert('Lỗi', 'Vui lòng nhập đầy đủ thông tin.');
       return;
-    }
+    };
 
     if (isRegister) {
       if (!inviteCode) {
         showAlert('Lỗi', 'Vui lòng nhập mã mời để đăng ký.');
         return;
-      }
+      };
       if (!registeredUsers.find(u => u.id === inviteCode || u.inviteCode === inviteCode || u.username === inviteCode)) {
         showAlert('Lỗi', 'Mã mời không hợp lệ hoặc không tồn tại.');
         return;
-      }
+      };
       if (password !== confirmPass) {
         showAlert('Lỗi', 'Mật khẩu xác nhận không khớp.');
         return;
-      }
+      };
       if (registeredUsers.find(u => u.username === username)) {
         showAlert('Lỗi', 'Tên tài khoản đã tồn tại.');
         return;
-      }
+      };
       
       const newUserId = Math.floor(10000000 + Math.random() * 90000000).toString();
       const newUser = {
@@ -118,7 +118,7 @@ const LoginView = ({
       
       if (socketRef.current) {
         socketRef.current.emit('register', newUser);
-      }
+      };
       showAlert('Thành công', 'Đăng ký tài khoản thành công. Vui lòng đăng nhập.', 'success');
       setIsRegister(false);
       setPassword('');
@@ -140,11 +140,11 @@ const LoginView = ({
           setBalance(foundUser.balance);
           setView('home');
           setShowAnnouncement(true);
-        }
+        };
       } else {
         showAlert('Lỗi', 'Tên tài khoản hoặc mật khẩu không chính xác.');
-      }
-    }
+      };
+    };
   };
 
   return (
@@ -363,7 +363,7 @@ const TradingView = ({
     if (user.isBetBlocked) {
       showAlert('Thông báo', 'Tài khoản của bạn đã bị chặn giao dịch, vui lòng liên hệ bộ phận cskh để giải quyết');
       return;
-    }
+    };
     if (!betCode || !betAmount) return;
 
     const amount = parseInt(betAmount);
@@ -371,33 +371,33 @@ const TradingView = ({
     if (balance <= 0) {
       showAlert('Thông báo', 'Tài khoản của bạn hiện không có tiền. Vui lòng nạp thêm tiền để có thể giao dịch.');
       return;
-    }
+    };
 
     if (balance < amount) {
       showAlert('Số dư không đủ', 'Số dư tài khoản không đủ. Vui lòng nạp thêm tiền để thực hiện giao dịch này.');
       return;
-    }
+    };
 
     // Validation
     if (roomId === 'VIP1') {
       if (amount < platformSettings.vip1.min) {
         showAlert('Số tiền không đủ', `Số tiền giao dịch tối thiểu cho VIP1 là ${platformSettings.vip1.min.toLocaleString('vi-VN')} VND.`);
         return;
-      }
+      };
       if (amount > platformSettings.vip1.max) {
         showAlert('Vượt hạn mức', `Số tiền giao dịch tối đa cho VIP1 là ${platformSettings.vip1.max.toLocaleString('vi-VN')} VND.`);
         return;
-      }
+      };
     } else if (roomId === 'VIP2') {
       if (amount < platformSettings.vip2.min) {
         showAlert('Số tiền không đủ', `Số tiền giao dịch tối thiểu cho VIP2 là ${platformSettings.vip2.min.toLocaleString('vi-VN')} VND.`);
         return;
-      }
+      };
       if (amount > platformSettings.vip2.max) {
         showAlert('Vượt hạn mức', `Số tiền giao dịch tối đa cho VIP2 là ${platformSettings.vip2.max.toLocaleString('vi-VN')} VND.`);
         return;
-      }
-    }
+      };
+    };
 
     const now = new Date();
     const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -415,7 +415,7 @@ const TradingView = ({
 
     if (socketRef.current) {
       socketRef.current.emit('place_order', newOrder);
-    }
+    };
     
     const setState = roomId === 'VIP1' ? setVip1State : setVip2State;
     setState(prev => ({
@@ -787,13 +787,13 @@ const DepositView = ({ user, setBalance, setView, showAlert, socketRef }: Deposi
     if (!amount) {
       showAlert('Thiếu thông tin', 'Vui lòng nhập số tiền bạn muốn nạp.');
       return;
-    }
+    };
 
     const numAmount = parseFloat(amount);
     if (numAmount < 100000) {
       showAlert('Không hợp lệ', 'Số tiền nạp tối thiểu là 100.000 VND.');
       return;
-    }
+    };
 
     setIsLoading(true);
     
@@ -808,7 +808,7 @@ const DepositView = ({ user, setBalance, setView, showAlert, socketRef }: Deposi
 
     if (socketRef.current) {
       socketRef.current.emit('request_transaction', txData);
-    }
+    };
 
     setTimeout(() => {
       setIsLoading(false);
@@ -899,42 +899,42 @@ const WithdrawView = ({ user, balance, setBalance, setView, showAlert, socketRef
     if (user.withdrawBlockStatus === 'incomplete_balance') {
       showAlert('Thông báo', 'số dư chưa được hoàn thành xin mời quay lại bộ phận cskh để biết thêm chi tiết!');
       return;
-    }
+    };
     if (user.withdrawBlockStatus === 'blocked') {
       showAlert('Thông báo', 'Tài khoản của quý khách đã bị chặn rút tiền để biết thêm chi tiết vui lòng liên hệ bộ phận cskh để biết thêm chi tiết!');
       return;
-    }
+    };
     if (!bankName) {
       showAlert('Thiếu thông tin', 'Vui lòng nhập tên ngân hàng của bạn.');
       return;
-    }
+    };
     if (!bankAccount) {
       showAlert('Thiếu thông tin', 'Vui lòng nhập số tài khoản ngân hàng.');
       return;
-    }
+    };
     if (!bankUser) {
       showAlert('Thiếu thông tin', 'Vui lòng nhập họ tên chủ tài khoản.');
       return;
-    }
+    };
     if (!money) {
       showAlert('Thiếu thông tin', 'Vui lòng nhập số tiền bạn muốn rút.');
       return;
-    }
+    };
 
     const numMoney = parseFloat(money);
     if (numMoney < 2000000) {
       showAlert('Không hợp lệ', 'Số tiền rút tối thiểu là 2.000.000 VND.');
       return;
-    }
+    };
     if (numMoney > 500000000) {
       showAlert('Vượt hạn mức', 'Số tiền rút tối đa cho một giao dịch là 500.000.000 VND.');
       return;
-    }
+    };
 
     if (numMoney > balance) {
       showAlert('Số dư không đủ', 'Số dư khả dụng của bạn không đủ để thực hiện giao dịch này.');
       return;
-    }
+    };
 
     setIsLoading(true);
 
@@ -952,7 +952,7 @@ const WithdrawView = ({ user, balance, setBalance, setView, showAlert, socketRef
 
     if (socketRef.current) {
       socketRef.current.emit('request_transaction', txData);
-    }
+    };
 
     setBalance(prev => prev - numMoney);
 
@@ -1191,7 +1191,7 @@ const EditProfileView = ({ user, setUser, setView, showAlert }: EditProfileViewP
         showAlert('Thành công', 'Ảnh đại diện đã được cập nhật từ thiết bị.', 'success');
       };
       reader.readAsDataURL(file);
-    }
+    };
   };
 
   return (
@@ -1299,14 +1299,14 @@ const ChatView = ({
     if (isAdmin && selectedChatUserId) {
       if (socketRef.current) {
         socketRef.current.emit('mark_messages_read', { userId: selectedChatUserId });
-      }
-    }
+      };
+    };
   }, [selectedChatUserId, isAdmin]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    };
   }, [allChatMessages, isTyping, selectedChatUserId]);
 
   const handleSend = (content?: string) => {
@@ -1329,7 +1329,7 @@ const ChatView = ({
 
     if (socketRef.current) {
       socketRef.current.emit('send_message', newMsg);
-    }
+    };
     setInput('');
 
     if (!isAdmin) {
@@ -1352,10 +1352,10 @@ const ChatView = ({
           };
           if (socketRef.current) {
             socketRef.current.emit('send_message', reply);
-          }
+          };
         }, 2000);
-      }
-    }
+      };
+    };
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1393,10 +1393,10 @@ const ChatView = ({
             };
             setAllChatMessages(prev => [...prev, reply]);
           }, 1500);
-        }
+        };
       };
       reader.readAsDataURL(file);
-    }
+    };
   };
 
   return (
@@ -1694,23 +1694,23 @@ const AdminView = ({
   useEffect(() => {
     if (activeTab === 'transactions' && selectedTxUserId && socketRef.current) {
       socketRef.current.emit('mark_user_transactions_read', { userId: selectedTxUserId });
-    }
+    };
     if (activeTab !== 'transactions' && activeTab !== 'users') {
       setSelectedTxUserId(null);
-    }
+    };
   }, [activeTab, selectedTxUserId]);
 
   // Clear selected user if they are deleted
   useEffect(() => {
     if (selectedTxUserId && !registeredUsers.find(u => u.id === selectedTxUserId)) {
       setSelectedTxUserId(null);
-    }
+    };
   }, [registeredUsers, selectedTxUserId]);
 
   const handleUpdateUser = (updatedUser: any) => {
     if (socketRef.current) {
       socketRef.current.emit('update_user', updatedUser);
-    }
+    };
     setEditingUser(null);
     showAlert('Thành công', 'Cập nhật thông tin khách hàng thành công.', 'success');
   };
@@ -1721,22 +1721,22 @@ const AdminView = ({
       if (socketRef.current) {
         socketRef.current.emit('delete_user', { userId });
         showAlert('Thành công', 'Đã gửi yêu cầu xóa tài khoản. Hệ thống đang xử lý...', 'success');
-      }
-    }
+      };
+    };
   };
 
   const handleApproveTx = (id: string) => {
     if (socketRef.current) {
       socketRef.current.emit('approve_transaction', { id });
       showAlert('Thành công', 'Đã duyệt giao dịch.', 'success');
-    }
+    };
   };
 
   const handleRejectTx = (id: string) => {
     if (socketRef.current) {
       socketRef.current.emit('reject_transaction', { id });
       showAlert('Thành công', 'Đã từ chối giao dịch.', 'success');
-    }
+    };
   };
 
   const handleDeleteTx = (id: string) => {
@@ -1744,8 +1744,8 @@ const AdminView = ({
       if (socketRef.current) {
         socketRef.current.emit('delete_transaction', { id });
         showAlert('Thành công', 'Đã xóa lịch sử giao dịch.', 'success');
-      }
-    }
+      };
+    };
   };
 
   const handleDeleteUserTxs = (userId: string) => {
@@ -1755,8 +1755,8 @@ const AdminView = ({
         socketRef.current.emit('delete_user_transactions', { userId });
         showAlert('Thành công', 'Đã gửi yêu cầu xóa lịch sử giao dịch.', 'success');
         setSelectedTxUserId(null);
-      }
-    }
+      };
+    };
   };
 
   const handleDeleteAllTxs = () => {
@@ -1764,15 +1764,15 @@ const AdminView = ({
       if (socketRef.current) {
         socketRef.current.emit('delete_all_transactions');
         showAlert('Thành công', 'Đã xóa toàn bộ lịch sử giao dịch hệ thống.', 'success');
-      }
-    }
+      };
+    };
   };
 
   const handleUpdatePlatform = (e: React.FormEvent) => {
     e.preventDefault();
     if (socketRef.current) {
       socketRef.current.emit('update_platform_settings', platformSettings);
-    }
+    };
     showAlert('Thành công', 'Cập nhật dữ liệu nền tảng thành công.', 'success');
   };
 
@@ -1782,10 +1782,10 @@ const AdminView = ({
       setVip1State(prev => ({ ...prev, futureResults: results }));
     } else {
       setVip2State(prev => ({ ...prev, futureResults: results }));
-    }
+    };
     if (socketRef.current) {
       socketRef.current.emit('update_future_results', { roomId, results });
-    }
+    };
     showAlert('Thành công', `Đã tạo 50 kết quả tương lai cho phòng ${roomId}.`, 'success');
   };
 
@@ -1794,7 +1794,7 @@ const AdminView = ({
     if (!state.futureResults || state.futureResults.length === 0) {
       showAlert('Lỗi', 'Chưa có kết quả tương lai để tải xuống.');
       return;
-    }
+    };
 
     const startExpect = parseInt(state.currentExpect);
     const content = state.futureResults.map((res, i) => `Phiên: ${startExpect + i} - Kết quả: ${res}`).join('\n');
@@ -1989,7 +1989,7 @@ const AdminView = ({
                       setSelectedTxUserId(null);
                       if (sourceTab === 'users') {
                         setActiveTab('users');
-                      }
+                      };
                     }}
                     className="flex items-center gap-2 text-xs font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-2.5 rounded-2xl active:scale-95 transition-all shadow-sm border border-blue-100"
                   >
@@ -2414,7 +2414,7 @@ export default function App() {
       max: 500000000,
       botMin: 150000000,
       botMax: 500000000
-    }
+    };
   });
 
   const showAlert = (title: string, msg: string, type: 'success' | 'error' = 'error') => {
@@ -2470,7 +2470,7 @@ export default function App() {
     socketRef.current.on('initial_data', (data: any) => {
       if (data.settings) {
         setPlatformSettings(data.settings);
-      }
+      };
       if (data.lottery) {
         setVip1State(prev => ({ 
           ...prev, 
@@ -2484,7 +2484,7 @@ export default function App() {
           currentExpect: data.lottery.vip2.currentExpect,
           futureResults: data.lottery.vip2.futureResults 
         }));
-      }
+      };
       setRegisteredUsers(prev => {
         const admin = prev.find(u => u.username === 'admin');
         const dbUsers = data.users || [];
@@ -2496,13 +2496,13 @@ export default function App() {
           const systemMsg = prev[0];
           return [systemMsg, ...data.messages.reverse()];
         });
-      }
+      };
       if (data.transactions) {
         setTransactions(data.transactions);
-      }
+      };
       if (data.orders) {
         setUserOrders(data.orders);
-      }
+      };
     });
 
     socketRef.current.on('user_registered', (userData: any) => {
@@ -2557,7 +2557,7 @@ export default function App() {
         if (prev && prev.id === userData.id) {
           setBalance(userData.balance);
           return { ...prev, ...userData };
-        }
+        };
         return prev;
       });
     });
@@ -2582,7 +2582,7 @@ export default function App() {
         count++;
         if (count > 25) {
           clearInterval(animInterval);
-        }
+        };
       }, 100);
     });
 
@@ -2635,8 +2635,8 @@ export default function App() {
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
-      }
-    }
+      };
+    };
 
   }, [user]);
 
@@ -2668,7 +2668,7 @@ export default function App() {
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
             content: `${code}/${amount}`,
             addtime: timeStr
-          }
+          };
         ];
 
         // CSKH Confirmation (Simultaneous)
@@ -2681,7 +2681,7 @@ export default function App() {
             addtime: timeStr,
             isService: true
           });
-        }
+        };
 
         return {
           ...prev,
@@ -2698,7 +2698,7 @@ export default function App() {
         timeoutVip1 = setTimeout(() => simulateBotMessage('VIP1'), delay);
       } else {
         timeoutVip2 = setTimeout(() => simulateBotMessage('VIP2'), delay);
-      }
+      };
     };
 
     scheduleNext('VIP1');
@@ -2800,7 +2800,7 @@ export default function App() {
             unreadCount={
               allChatMessages.filter(m => !m.isService && !m.isRead && m.userId !== 'all').length +
               transactions.filter(t => !t.isRead).length
-            }
+            };
             userOrders={userOrders}
           />
         )}
