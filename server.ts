@@ -187,25 +187,61 @@ app.get("*", (req, res) => {
   });
 
     // Initial data sync
-    socket.on("get_initial_data", () => {
-      const users = db.prepare("SELECT * FROM users").all();
-      const messages = db.prepare("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 100").all();
-      const transactions = db.prepare("SELECT * FROM transactions ORDER BY time DESC").all();
-      const orders = db.prepare("SELECT * FROM orders ORDER BY time DESC LIMIT 100").all();
-      const settingsRow = db.prepare("SELECT * FROM settings WHERE id = 'platform'").get();
-      const settings = settingsRow ? JSON.parse(settingsRow.data) : null;
-      socket.emit("initial_data", { 
-        users, 
-        messages, 
-        transactions, 
-        orders, 
-        settings,
-        lottery: {
-          vip1: vip1State,
-          vip2: vip2State
-        }
-      });
-    });
+    socket.on("get_initial_data", (userId) => {
+
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+
+  const messages = db.prepare("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 100").all();
+
+  const orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(userId);
+
+  const transactions = db.prepare("SELECT * FROM transactions WHERE userId = ? ORDER BY time DESC").all(userId);
+
+  const settingsRow = db.prepare("SELECT * FROM settings WHERE id = 'platform'").get();
+
+  const settings = settingsRow ? JSON.parse(settingsRow.data) : null;
+
+  socket.emit("initial_data", { 
+    user,
+    messages,
+    orders,
+    transactions,
+    settings,
+    lottery: {
+      vip1: vip1State,
+      vip2: vip2State
+    }
+  });
+
+});
+
+socket.on("admin_get_all_orders", (adminId) => {
+
+  const admin = db.prepare("SELECT * FROM users WHERE id = ?").get(adminId);
+
+  if (admin && admin.username === "admin") {
+
+    const orders = db.prepare("SELECT * FROM orders ORDER BY time DESC").all();
+
+    socket.emit("admin_all_orders", orders);
+
+  }
+
+});
+
+socket.on("admin_get_user_orders", (data) => {
+
+  const admin = db.prepare("SELECT * FROM users WHERE id = ?").get(data.adminId);
+
+  if (admin && admin.username === "admin") {
+
+    const orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(data.userId);
+
+    socket.emit("admin_user_orders", orders);
+
+  }
+
+});
 
     socket.on("update_platform_settings", (settings) => {
       try {
