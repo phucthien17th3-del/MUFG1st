@@ -133,6 +133,15 @@ async function startServer() {
 
   const PORT = process.env.PORT || 3000;
 
+// robots.txt cho bot Google
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.send(`User-agent: *
+Allow: /
+
+Sitemap: https://mufg-server.onrender.com/sitemap.xml`);
+});
+
   // Auto-delete messages from previous days every hour
   setInterval(() => {
     try {
