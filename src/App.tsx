@@ -2466,7 +2466,6 @@ export default function App() {
 
 }, [user]);
 
-    });
 
     socketRef.current.on('initial_data', (data: any) => {
       if (data.settings) {
