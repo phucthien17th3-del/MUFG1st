@@ -2638,7 +2638,7 @@ export default function App() {
     });
 
     socketRef.current.on('messages_cleaned', () => {
-      socketRef.current.emit('get_initial_data');
+      socketRef.current.emit('get_initial_data', user?.id);
     });
 
     return () => {
