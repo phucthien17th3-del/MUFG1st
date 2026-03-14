@@ -2645,7 +2645,8 @@ export default function App() {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
-    };
+    }
+
   }, [user]);
 
   // Simulation Loops
