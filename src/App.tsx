@@ -2448,11 +2448,24 @@ export default function App() {
 
   // Socket.io initialization
   useEffect(() => {
-    socketRef.current = io();
 
-    socketRef.current.on('connect', () => {
-      console.log('Connected to server');
-      socketRef.current.emit('get_initial_data');
+  socketRef.current = io();
+
+  socketRef.current.on("connect", () => {
+
+    socketRef.current.emit("get_initial_data", user?.id);
+
+    socketRef.current.emit("join_room", "VIP1");
+    socketRef.current.emit("join_room", "VIP2");
+
+  });
+
+  socketRef.current.on('messages_cleaned', () => {
+    socketRef.current.emit('get_initial_data', user?.id);
+  });
+
+}, [user]);
+
     });
 
     socketRef.current.on('initial_data', (data: any) => {

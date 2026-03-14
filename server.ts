@@ -284,11 +284,9 @@ socket.on("admin_get_user_orders", (data) => {
       order.time
     );
 
-    socket.emit("new_order", order);  // Gửi cho chính người dùng đặt lệnh
+    io.to(order.room).emit("new_order", order);  // Gửi cho chính người dùng đặt lệnh
 
-    if (user.username === "admin") {
-      io.emit("admin_all_orders", order);  // Gửi cho admin xem tất cả lệnh
-    }
+   
 
     io.emit("user_updated", { ...user, balance: newBalance });
 
