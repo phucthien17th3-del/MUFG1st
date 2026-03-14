@@ -2500,8 +2500,8 @@ export default function App() {
         setTransactions(data.transactions);
       };
       if (data.orders) {
-        setUserOrders(data.orders);
-      };
+  setUserOrders(data.orders);
+}
     });
 
     socketRef.current.on('user_registered', (userData: any) => {
@@ -2797,9 +2797,9 @@ export default function App() {
             setIsChatOpen={setIsChatOpen}
             handleLogout={handleLogout}
             unreadCount={
-              allChatMessages.filter(m => !m.isService && !m.isRead && m.userId !== 'all').length +
-              transactions.filter(t => !t.isRead).length
-            };
+  allChatMessages.filter(m => !m.isService && !m.isRead && m.userId !== 'all').length +
+  transactions.filter(t => !t.isRead).length
+}
             userOrders={userOrders}
           />
         )}
