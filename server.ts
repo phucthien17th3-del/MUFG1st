@@ -179,7 +179,12 @@ app.get("*", (req, res) => {
 
   // Socket.io logic
   io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
+  console.log("A user connected:", socket.id);
+
+  socket.on("join_room", (roomId) => {
+    socket.join(roomId);
+    console.log("User joined room:", roomId);
+  });
 
     // Initial data sync
     socket.on("get_initial_data", () => {
@@ -213,7 +218,7 @@ app.get("*", (req, res) => {
 
    socket.on("place_order", (order) => {
 
-  io.emit("global_trade_notice", order);
+  io.to(order.room).emit("global_trade_notice", order);
 
   try {
         const user = db.prepare("SELECT * FROM users WHERE id = ?").get(order.userId);
@@ -236,7 +241,7 @@ app.get("*", (req, res) => {
           order.status,
           order.time
         );
-        io.emit("new_order", order);
+        io.to(order.room).emit("new_order", order);
         io.emit("user_updated", { ...user, balance: newBalance });
       } catch (e) {
         console.error("Place order error:", e);
