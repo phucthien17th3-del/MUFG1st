@@ -195,7 +195,17 @@ app.get("*", (req, res) => {
 
   const messages = db.prepare("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 100").all();
 
-  const orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(userId);
+  let orders;
+
+if (user.username === "admin") {
+
+  orders = db.prepare("SELECT * FROM orders ORDER BY time DESC").all();
+
+} else {
+
+  orders = db.prepare("SELECT * FROM orders WHERE userId = ? ORDER BY time DESC").all(userId);
+
+}
 
   const transactions = db.prepare("SELECT * FROM transactions WHERE userId = ? ORDER BY time DESC").all(userId);
 
@@ -279,7 +289,8 @@ socket.on("admin_get_user_orders", (data) => {
           order.status,
           order.time
         );
-        io.to(order.room).emit("new_order", order);
+        socket.emit("new_order", order);          // gửi cho chính user đặt
+io.to(order.room).emit("room_order", order);  // gửi cho phòng giao dịch
         io.emit("user_updated", { ...user, balance: newBalance });
       } catch (e) {
         console.error("Place order error:", e);
