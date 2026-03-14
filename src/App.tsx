@@ -2458,11 +2458,10 @@ export default function App() {
   });
 
   return () => {
-    if (socketRef.current) {
-      socketRef.current.removeAllListeners();
-      socketRef.current.disconnect();
-    };
-  };
+  if (socketRef.current) {
+    socketRef.current.disconnect();
+  }
+};
 
 }, [user]);
 
@@ -2633,12 +2632,12 @@ export default function App() {
     });
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      };
-    };
+  if (socketRef.current) {
+    socketRef.current.disconnect();
+  }
+};
 
-  }, [user]);
+}, [user]);
 
   // Simulation Loops
   useEffect(() => {
@@ -2662,14 +2661,14 @@ export default function App() {
 
       setState(prev => {
         const newMessages: Message[] = [
-          {
-            id: Date.now().toString(),
-            nickname: name,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-            content: `${code}/${amount}`,
-            addtime: timeStr
-          };
-        ];
+  {
+    id: Date.now().toString(),
+    nickname: name,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+    content: `${code}/${amount}`,
+    addtime: timeStr
+  }
+];
 
         // CSKH Confirmation (Simultaneous)
         if (Math.random() > 0.4) {
@@ -2697,8 +2696,8 @@ export default function App() {
       if (roomId === 'VIP1') {
         timeoutVip1 = setTimeout(() => simulateBotMessage('VIP1'), delay);
       } else {
-        timeoutVip2 = setTimeout(() => simulateBotMessage('VIP2'), delay);
-      };
+  timeoutVip2 = setTimeout(() => simulateBotMessage('VIP2'), delay);
+}
     };
 
     scheduleNext('VIP1');
@@ -2911,9 +2910,9 @@ export default function App() {
                 </div>
 
                 <button 
-                  onClick={() => setShowAnnouncement(false)}
-                  className="w-full h-14 bg-gradient-to-r from-[#c00001] to-[#f13031] rounded-2xl text-white font-black text-lg shadow-xl shadow-red-100 active:scale-95 transition-all"
-                >
+  onClick={() => setShowAnnouncement(false)}
+  className="w-full h-14 bg-gradient-to-r from-[#c00001] to-[#f13031] rounded-2xl text-white font-black text-lg shadow-xl shadow-red-100 active:scale-95 transition-all"
+>
                   XÁC NHẬN
                 </button>
               </div>
