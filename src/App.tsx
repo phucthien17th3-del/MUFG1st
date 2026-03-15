@@ -2346,11 +2346,14 @@ const AdminView = ({
 };
 
 export default function App() {
+
   const [showIntro, setShowIntro] = useState(true);
   const socketRef = useRef<any>(null);
+
   const [view, setView] = useState<ViewType>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+
   const [registeredUsers, setRegisteredUsers] = useState<any[]>([
     { 
       username: 'admin', 
@@ -2365,6 +2368,7 @@ export default function App() {
     }
   ]);
   const [balance, setBalance] = useState(439000000);
+
   const [user, setUser] = useState({
     username: 'truclinh123',
     id: '88992211',
@@ -2712,6 +2716,10 @@ export default function App() {
     setIsAdmin(false);
     setView('login');
   };
+
+if (showIntro) {
+  return <LandingPage onContinue={() => setShowIntro(false)} />;
+}
 
   return (
     <div className="max-w-md mx-auto bg-[#f8f9fa] min-h-screen relative font-sans">
