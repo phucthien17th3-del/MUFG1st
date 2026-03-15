@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import LandingPage from './LandingPage';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home, 
@@ -2345,6 +2346,7 @@ const AdminView = ({
 };
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
   const socketRef = useRef<any>(null);
   const [view, setView] = useState<ViewType>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
