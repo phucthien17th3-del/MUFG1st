@@ -1,0 +1,6 @@
+Hook Discovery Results
+Total files: 0
+
+
+Sources (1)
+  /c:/Users/SenetUser/.claude/settings.json

@@ -360,37 +360,6 @@ const TradingView = ({
   const [betAmount, setBetAmount] = useState('');
   const [betCode, setBetCode] = useState('');
 
-  useEffect(() => {
-    if (!socketRef.current) return;
-
-    const handleGlobalTradeNotice = (order: any) => {
-      if (order.userId !== user.id) { // Chỉ add nếu không phải lệnh của chính mình
-        const setState = roomId === 'VIP1' ? setVip1State : setVip2State;
-        setState(prev => ({
-          ...prev,
-          messages: [
-            {
-              id: `trade-${order.id}`,
-              nickname: order.username || 'Người dùng',
-              avatar: order.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=user',
-              content: `${order.betCode}/${order.amount}`,
-              addtime: order.time,
-              userId: order.userId,
-              isService: false
-            },
-            ...prev.messages
-          ] as Message[]
-        }));
-      }
-    };
-
-    socketRef.current.on('global_trade_notice', handleGlobalTradeNotice);
-
-    return () => {
-      socketRef.current?.off('global_trade_notice', handleGlobalTradeNotice);
-    };
-  }, [socketRef, user.id, roomId, setVip1State, setVip2State]);
-
   const handleBet = () => {
     if (user.isBetBlocked) {
       showAlert('Thông báo', 'Tài khoản của bạn đã bị chặn giao dịch, vui lòng liên hệ bộ phận cskh để giải quyết');
