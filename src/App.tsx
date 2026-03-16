@@ -247,11 +247,11 @@ interface HomeViewProps {
 
 const HomeView = ({ setView, setIsChatOpen }: HomeViewProps) => (
   <div className="pb-24 animate-fade-in">
-    <div className="bg-gradient-to-b from-[#f13031] to-[#c00001] h-14 flex items-center justify-center shadow-md fixed top-0 w-full z-50">
+    <div className="bg-gradient-to-b from-[#f13031] to-[#c00001] h-14 flex items-center justify-center shadow-md w-full">
       <h1 className="text-white font-bold text-lg tracking-wide">MUFG GLOBAL</h1>
     </div>
 
-    <div className="mt-14 p-4">
+    <div className="p-4">
       <div className="rounded-2xl overflow-hidden shadow-lg mb-6">
         <img src="https://extgw.dsc.com.vn/eback/uploads/loi_ich_va_rui_ro_khi_tham_gia_thi_truong_tai_chinh_b81897acfe.jpg" className="w-full h-40 object-cover" alt="Banner" />
       </div>
@@ -359,6 +359,37 @@ const TradingView = ({
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [betAmount, setBetAmount] = useState('');
   const [betCode, setBetCode] = useState('');
+
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    const handleGlobalTradeNotice = (order: any) => {
+      if (order.userId !== user.id) { // Chỉ add nếu không phải lệnh của chính mình
+        const setState = roomId === 'VIP1' ? setVip1State : setVip2State;
+        setState(prev => ({
+          ...prev,
+          messages: [
+            {
+              id: `trade-${order.id}`,
+              nickname: order.username || 'Người dùng',
+              avatar: order.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=user',
+              content: `${order.betCode}/${order.amount}`,
+              addtime: order.time,
+              userId: order.userId,
+              isService: false
+            },
+            ...prev.messages
+          ] as Message[]
+        }));
+      }
+    };
+
+    socketRef.current.on('global_trade_notice', handleGlobalTradeNotice);
+
+    return () => {
+      socketRef.current?.off('global_trade_notice', handleGlobalTradeNotice);
+    };
+  }, [socketRef, user.id, roomId, setVip1State, setVip2State]);
 
   const handleBet = () => {
     if (user.isBetBlocked) {
@@ -1656,10 +1687,8 @@ interface AdminViewProps {
   platformSettings: any;
   setPlatformSettings: React.Dispatch<React.SetStateAction<any>>;
   showAlert: (title: string, msg: string, type?: 'success' | 'error') => void;
-  vip1State: RoomState;
-  setVip1State: React.Dispatch<React.SetStateAction<RoomState>>;
-  vip2State: RoomState;
-  setVip2State: React.Dispatch<React.SetStateAction<RoomState>>;
+  vipState: RoomState;
+  setVipState: React.Dispatch<React.SetStateAction<RoomState>>;
   socketRef: React.MutableRefObject<any>;
   setSelectedChatUserId: React.Dispatch<React.SetStateAction<string | null>>;
   setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -1677,10 +1706,8 @@ const AdminView = ({
   platformSettings, 
   setPlatformSettings, 
   showAlert,
-  vip1State,
-  setVip1State,
-  vip2State,
-  setVip2State,
+  vipState,
+  setVipState,
   socketRef,
   setSelectedChatUserId,
   setIsChatOpen,
@@ -1779,11 +1806,7 @@ const AdminView = ({
 
   const generateFutureResults = (roomId: 'VIP1' | 'VIP2') => {
     const results = Array.from({ length: 50 }, () => CODES[Math.floor(Math.random() * CODES.length)]);
-    if (roomId === 'VIP1') {
-      setVip1State(prev => ({ ...prev, futureResults: results }));
-    } else {
-      setVip2State(prev => ({ ...prev, futureResults: results }));
-    };
+    setVipState(prev => ({ ...prev, futureResults: results }));
     if (socketRef.current) {
       socketRef.current.emit('update_future_results', { roomId, results });
     };
@@ -1791,14 +1814,13 @@ const AdminView = ({
   };
 
   const downloadResults = (roomId: 'VIP1' | 'VIP2') => {
-    const state = roomId === 'VIP1' ? vip1State : vip2State;
-    if (!state.futureResults || state.futureResults.length === 0) {
+    if (!vipState.futureResults || vipState.futureResults.length === 0) {
       showAlert('Lỗi', 'Chưa có kết quả tương lai để tải xuống.');
       return;
     };
 
-    const startExpect = parseInt(state.currentExpect);
-    const content = state.futureResults.map((res, i) => `Phiên: ${startExpect + i} - Kết quả: ${res}`).join('\n');
+    const startExpect = parseInt(vipState.currentExpect);
+    const content = vipState.futureResults.map((res, i) => `Phiên: ${startExpect + i} - Kết quả: ${res}`).join('\n');
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2179,11 +2201,11 @@ const AdminView = ({
                   <Download className="w-4 h-4" /> Tải xuống
                 </button>
               </div>
-              {vip1State.futureResults && vip1State.futureResults.length > 0 ? (
+              {vipState.futureResults && vipState.futureResults.length > 0 ? (
                 <div className="grid grid-cols-5 gap-2 max-h-[200px] overflow-y-auto pr-2 scrollbar-hide">
-                  {vip1State.futureResults.map((res, i) => (
+                  {vipState.futureResults.map((res, i) => (
                     <div key={i} className="bg-gray-50 p-2 rounded-lg text-center">
-                      <div className="text-[8px] text-gray-400 font-bold uppercase">#{parseInt(vip1State.currentExpect) + i}</div>
+                      <div className="text-[8px] text-gray-400 font-bold uppercase">#{parseInt(vipState.currentExpect) + i}</div>
                       <div className="text-xs font-black text-blue-600">{res}</div>
                     </div>
                   ))}
@@ -2209,11 +2231,11 @@ const AdminView = ({
                   <Download className="w-4 h-4" /> Tải xuống
                 </button>
               </div>
-              {vip2State.futureResults && vip2State.futureResults.length > 0 ? (
+              {vipState.futureResults && vipState.futureResults.length > 0 ? (
                 <div className="grid grid-cols-5 gap-2 max-h-[200px] overflow-y-auto pr-2 scrollbar-hide">
-                  {vip2State.futureResults.map((res, i) => (
+                  {vipState.futureResults.map((res, i) => (
                     <div key={i} className="bg-gray-50 p-2 rounded-lg text-center">
-                      <div className="text-[8px] text-gray-400 font-bold uppercase">#{parseInt(vip2State.currentExpect) + i}</div>
+                      <div className="text-[8px] text-gray-400 font-bold uppercase">#{parseInt(vipState.currentExpect) + i}</div>
                       <div className="text-xs font-black text-blue-600">{res}</div>
                     </div>
                   ))}
@@ -2432,23 +2454,13 @@ export default function App() {
   };
 
   // Trading Rooms State
-  const [vip1State, setVip1State] = useState<RoomState>({
+  const [vipState, setVipState] = useState<RoomState>({
     currentExpect: '20240103201',
     timeLeft: INITIAL_TIMER,
     isRunning: false,
     symbols: ['?', '?', '?'],
     result: '?',
     history: generateMockHistory(20240103201, 100),
-    messages: []
-  });
-
-  const [vip2State, setVip2State] = useState<RoomState>({
-    currentExpect: '20240103501',
-    timeLeft: INITIAL_TIMER,
-    isRunning: false,
-    symbols: ['?', '?', '?'],
-    result: '?',
-    history: generateMockHistory(20240103501, 100),
     messages: []
   });
 
@@ -2467,17 +2479,11 @@ export default function App() {
         setPlatformSettings(data.settings);
       }
       if (data.lottery) {
-        setVip1State(prev => ({ 
+        setVipState(prev => ({ 
           ...prev, 
           timeLeft: data.lottery.vip1.timeLeft, 
           currentExpect: data.lottery.vip1.currentExpect,
           futureResults: data.lottery.vip1.futureResults 
-        }));
-        setVip2State(prev => ({ 
-          ...prev, 
-          timeLeft: data.lottery.vip2.timeLeft, 
-          currentExpect: data.lottery.vip2.currentExpect,
-          futureResults: data.lottery.vip2.futureResults 
         }));
       }
       setRegisteredUsers(prev => {
@@ -2559,18 +2565,16 @@ export default function App() {
     });
 
     socketRef.current.on('timer_update', (data: any) => {
-      setVip1State(prev => ({ ...prev, timeLeft: data.vip1Time }));
-      setVip2State(prev => ({ ...prev, timeLeft: data.vip2Time }));
+      setVipState(prev => ({ ...prev, timeLeft: data.vip1Time }));
     });
 
     socketRef.current.on('lottery_animation_start', (data: any) => {
-      const setState = data.roomId === 'VIP1' ? setVip1State : setVip2State;
-      setState(prev => ({ ...prev, isRunning: true }));
+      setVipState(prev => ({ ...prev, isRunning: true }));
       
       let count = 0;
       const animInterval = setInterval(() => {
         const rand = CODES[Math.floor(Math.random() * CODES.length)];
-        setState(prev => ({
+        setVipState(prev => ({
           ...prev,
           symbols: rand.split(''),
           result: rand
@@ -2583,11 +2587,10 @@ export default function App() {
     });
 
     socketRef.current.on('lottery_result', (data: any) => {
-      const setState = data.roomId === 'VIP1' ? setVip1State : setVip2State;
       const now = new Date();
       const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      setState(prev => ({
+      setVipState(prev => ({
         ...prev,
         isRunning: false,
         symbols: data.result.split(''),
@@ -2642,7 +2645,6 @@ export default function App() {
     let timeoutVip2: NodeJS.Timeout;
 
     const simulateBotMessage = (roomId: 'VIP1' | 'VIP2') => {
-      const setState = roomId === 'VIP1' ? setVip1State : setVip2State;
       const name = VN_NAMES[Math.floor(Math.random() * VN_NAMES.length)];
       const code = CODES[Math.floor(Math.random() * CODES.length)];
       
@@ -2653,7 +2655,7 @@ export default function App() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      setState(prev => {
+      setVipState(prev => {
         const newMessages: Message[] = [
           {
             id: Date.now().toString(),
@@ -2741,8 +2743,8 @@ if (showIntro) {
         {view === 'home' && <HomeView setView={setView} setIsChatOpen={setIsChatOpen} />}
         {view === 'market' && (
           <MarketView 
-            vip1State={vip1State}
-            vip2State={vip2State}
+            vip1State={vipState}
+            vip2State={vipState}
           />
         )}
         {view === 'orders' && (
@@ -2753,13 +2755,13 @@ if (showIntro) {
         {view === 'trading-vip1' && (
           <TradingView 
             roomId="VIP1" 
-            vip1State={vip1State}
-            vip2State={vip2State}
+            vip1State={vipState}
+            vip2State={vipState}
             user={user}
             balance={balance}
             platformSettings={platformSettings}
-            setVip1State={setVip1State}
-            setVip2State={setVip2State}
+            setVip1State={setVipState}
+            setVip2State={setVipState}
             setUserOrders={setUserOrders}
             setBalance={setBalance}
             setView={setView}
@@ -2770,13 +2772,13 @@ if (showIntro) {
         {view === 'trading-vip2' && (
           <TradingView 
             roomId="VIP2" 
-            vip1State={vip1State}
-            vip2State={vip2State}
+            vip1State={vipState}
+            vip2State={vipState}
             user={user}
             balance={balance}
             platformSettings={platformSettings}
-            setVip1State={setVip1State}
-            setVip2State={setVip2State}
+            setVip1State={setVipState}
+            setVip2State={setVipState}
             setUserOrders={setUserOrders}
             setBalance={setBalance}
             setView={setView}
@@ -2811,10 +2813,8 @@ if (showIntro) {
             platformSettings={platformSettings}
             setPlatformSettings={setPlatformSettings}
             showAlert={showAlert}
-            vip1State={vip1State}
-            setVip1State={setVip1State}
-            vip2State={vip2State}
-            setVip2State={setVip2State}
+            vipState={vipState}
+            setVipState={setVipState}
             socketRef={socketRef}
             setSelectedChatUserId={setSelectedChatUserId}
             setIsChatOpen={setIsChatOpen}

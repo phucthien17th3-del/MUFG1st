@@ -653,7 +653,8 @@ const newBalance = user.balance - txData.amount;
         if (isWin) {
           const user = db.prepare("SELECT * FROM users WHERE id = ?").get(order.userId);
           if (user) {
-            const winAmount = order.amount * 2;
+            const multiplier = roomId === 'VIP1' ? 1.9 : 1.95;
+            const winAmount = order.amount * multiplier;
             const newBalance = user.balance + winAmount;
             db.prepare("UPDATE users SET balance = ? WHERE id = ?").run(newBalance, order.userId);
             io.emit("user_updated", { ...user, balance: newBalance });

@@ -6,6 +6,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+@layer base {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 @layer utilities {
   .shimmer-bg {
     background: linear-gradient(90deg, #61bce9 0%, #8ed1f1 50%, #61bce9 100%);
