@@ -1,24 +1,26 @@
-import { users } from "./db";
+export default function handler(req: any, res: any) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ success: false });
+    }
 
-export default function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+    const { username, password } = req.body || {};
 
-  const { username, password } = req.body;
+    if (username === "admin" && password === "admin123") {
+      return res.json({
+        success: true,
+        user: { username: "admin", balance: 999999 }
+      });
+    }
 
-  if (username === "admin" && password === "admin123") {
     return res.json({
-      success: true,
-      user: { username: "admin", balance: 9999999 }
+      success: false,
+      message: "Sai tài khoản"
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false
     });
   }
-
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
-
-  if (!user) {
-    return res.json({ success: false, message: "Sai tài khoản" });
-  }
-
-  return res.json({ success: true, user });
 }

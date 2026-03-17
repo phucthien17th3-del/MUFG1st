@@ -1,16 +1,24 @@
-import { users } from "./db";
+export default function handler(req: any, res: any) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ success: false });
+    }
 
-export default function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+    const { username, password } = req.body || {};
 
-  const { username, password } = req.body;
+    if (!username || !password) {
+      return res.json({ success: false, message: "Thiếu dữ liệu" });
+    }
 
-  if (users.find(u => u.username === username)) {
-    return res.json({ success: false, message: "Tài khoản đã tồn tại" });
+    return res.json({
+      success: true,
+      message: "Đăng ký OK"
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server lỗi"
+    });
   }
-
-  const user = { username, password, balance: 0 };
-  users.push(user);
-
-  return res.json({ success: true });
 }
