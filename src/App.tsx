@@ -101,6 +101,7 @@ const LoginView = ({
       
 
       const res = await register(username, password);
+      console.log("REGISTER RES:", res);
 
       if (!res.success) {
         showAlert('Lỗi', res.message || 'Đăng ký thất bại');
