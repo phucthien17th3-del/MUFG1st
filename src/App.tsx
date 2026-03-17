@@ -5,6 +5,7 @@
 
 import LandingPage from './LandingPage';
 import React, { useState, useEffect, useRef } from 'react';
+import { login, register } from "./api/auth";
 import { 
   Home, 
   BarChart2, 
@@ -78,7 +79,7 @@ const LoginView = ({
   const [confirmPass, setConfirmPass] = useState('');
   const [inviteCode, setInviteCode] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!username || !password) {
       showAlert('Lỗi', 'Vui lòng nhập đầy đủ thông tin.');
       return;
@@ -97,54 +98,35 @@ const LoginView = ({
         showAlert('Lỗi', 'Mật khẩu xác nhận không khớp.');
         return;
       };
-      if (registeredUsers.find(u => u.username === username)) {
-        showAlert('Lỗi', 'Tên tài khoản đã tồn tại.');
+      
+
+      const res = await register(username, password);
+
+      if (!res.success) {
+        showAlert('Lỗi', res.message || 'Đăng ký thất bại');
         return;
-      };
-      
-      const newUserId = Math.floor(10000000 + Math.random() * 90000000).toString();
-      const newUser = {
-        username,
-        password,
-        id: newUserId,
-        vip: 'Bronze',
-        balance: 0,
-        avatar: FAMOUS_AVATARS[0].url,
-        isVirtual: false,
-        withdrawBlockStatus: 'none',
-        isBetBlocked: false,
-        inviteCode: newUserId, // Their own code is their ID
-        referredBy: inviteCode // The code they used to register
-      };
-      
-      if (socketRef.current) {
-        socketRef.current.emit('register', newUser);
-      };
+      }
+
       showAlert('Thành công', 'Đăng ký tài khoản thành công. Vui lòng đăng nhập.', 'success');
       setIsRegister(false);
       setPassword('');
       setConfirmPass('');
     } else {
-      const foundUser = registeredUsers.find(u => u.username === username && u.password === password);
-      if (foundUser) {
-        if (foundUser.username === 'admin') {
-          setIsAdmin(true);
-          setIsLoggedIn(true);
-          setUser(foundUser);
-          setBalance(foundUser.balance);
-          setView('home');
-          setShowAnnouncement(true);
-        } else {
-          setIsAdmin(false);
-          setIsLoggedIn(true);
-          setUser(foundUser);
-          setBalance(foundUser.balance);
-          setView('home');
-          setShowAnnouncement(true);
-        };
-      } else {
-        showAlert('Lỗi', 'Tên tài khoản hoặc mật khẩu không chính xác.');
-      };
+      const res = await login(username, password);
+
+if (!res.success) {
+  showAlert('Lỗi', res.message || 'Sai tài khoản hoặc mật khẩu');
+  return;
+}
+
+const userData = res.user;
+
+setIsAdmin(userData.username === 'admin');
+setIsLoggedIn(true);
+setUser(userData);
+setBalance(userData.balance || 0);
+setView('home');
+setShowAnnouncement(true);
     };
   };
 
