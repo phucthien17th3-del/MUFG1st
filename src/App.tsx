@@ -1777,7 +1777,7 @@ const AdminView = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `KetQuaTuongLai_${roomId}_${state.currentExpect}.txt`;
+    a.download = `KetQuaTuongLai_${roomId}_${vipState.currentExpect}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2448,7 +2448,12 @@ export default function App() {
       if (data.messages) {
         setAllChatMessages(prev => {
           const systemMsg = prev[0];
-          return [systemMsg, ...data.messages.reverse()];
+          return [
+  systemMsg,
+  ...data.messages
+    .filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i)
+    .reverse()
+];
         });
       }
       if (data.transactions) {
@@ -2463,9 +2468,19 @@ export default function App() {
       setRegisteredUsers(prev => [...prev, userData]);
     });
 
-    socketRef.current.on('new_message', (msg: any) => {
-      setAllChatMessages(prev => [...prev, msg]);
+    socketRef.current.on('initial_data', (data: any) => {
+  if (data.messages) {
+    setAllChatMessages(prev => {
+      const systemMsg = prev[0];
+      return [
+        systemMsg,
+        ...data.messages
+          .filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i)
+          .reverse()
+      ];
     });
+  }
+});
 
     socketRef.current.on('new_transaction', (tx: any) => {
       setTransactions(prev => [tx, ...prev]);
